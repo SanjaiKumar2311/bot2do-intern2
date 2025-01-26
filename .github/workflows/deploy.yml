@@ -1,39 +1,36 @@
-name: Deploy React App
+name: Deploy React App to S3
 
 on:
   push:
     branches:
-      - main # Deploy when changes are pushed to the master branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # Use a Node.js version compatible with your React app
+          node-version: 18
 
-      # Step 3: Install dependencies and build the app
-      - name: Install and Build
-        run: |
-          npm install
-          npm run build
+      - name: Install dependencies
+        run: npm ci
 
-      # Step 4: Deploy to S3 using S3 Sync Action
-      - name: Deploy to S3
+      - name: Build project
+        run: npm run build
+
+      - name: Sync to S3
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: --acl public-read --follow-symlinks --delete
+          args: --acl public-read --delete
         env:
           AWS_S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY}}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEYS }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          SOURCE_DIR: 'build' # Upload the build folder
+          SOURCE_DIR: dist
