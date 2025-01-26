@@ -28,7 +28,7 @@ jobs:
 
       # Step 4: Sync build files to S3
       - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@v0.5.3
+        uses: jakejarvis/s3-sync-action@v0.5.2
         with:
           args: --acl public-read --delete
         env:
