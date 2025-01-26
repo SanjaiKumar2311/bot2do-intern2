@@ -3,14 +3,14 @@ name: Deploy Vite App to S3
 on:
   push:
     branches:
-      - master  # Change this from 'main' to 'master'
+      - master # Adjust this based on your branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code
+      # Step 1: Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
@@ -20,20 +20,21 @@ jobs:
         with:
           node-version: 18  # Adjust based on your project requirements
 
-      # Step 3: Install dependencies and build
-      - name: Install Dependencies and Build
+      # Step 3: Install dependencies and build the app
+      - name: Install dependencies and build the app
         run: |
           npm install
           npm run build
 
-      # Step 4: Sync build files to S3
+      # Step 4: Sync the build files to S3
       - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@master  # Using the main branch instead of a version
+        uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --delete
         env:
-          AWS_S3_BUCKET: ${{ secrets.BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}  # Replace with your secret name
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Replace with your secret name
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Replace with your secret name
+          AWS_REGION: ${{ secrets.AWS_REGION }}  # Replace with your secret name
           SOURCE_DIR: dist
+
