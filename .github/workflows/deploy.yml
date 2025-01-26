@@ -28,7 +28,7 @@ jobs:
 
       # Step 4: Sync build files to S3
       - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@main  # Using the main branch instead of a version
+        uses: jakejarvis/s3-sync-action@master  # Using the main branch instead of a version
         with:
           args: --acl public-read --delete
         env:
