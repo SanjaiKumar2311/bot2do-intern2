@@ -30,6 +30,7 @@ jobs:
       # Run Docker container to build the Vite app
       - name: Build Vite app inside Docker
         run: |
+          docker run --rm -v $(pwd):/app vite-react-app npm install
           docker run --rm -v $(pwd):/app vite-react-app npm run build
 
       # Deploy to S3 from Docker container
