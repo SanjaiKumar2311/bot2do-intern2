@@ -1,9 +1,9 @@
-name: Deploy Vite React App to S3
+name: Deploy Vite React App to S3 with Docker
 
 on:
   push:
     branches:
-      - master # Change this if you're using a different branch name
+      - master  # Change this if you're using a different branch name
 
 jobs:
   deploy:
@@ -14,29 +14,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Node.js (ensure compatibility with the version you are using)
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.13.0' # Ensure compatibility with your project
+      # Set up Docker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      # Debug: Check Node.js version
-      - name: Check Node.js version
-        run: node -v
+      # Debug: Check Docker version
+      - name: Check Docker version
+        run: docker --version
 
-      # Install dependencies
-      - name: Install dependencies
-        run: npm install
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t vite-react-app .
 
-      # Debug: Run a simple check on dependencies
-      - name: Verify dependencies
-        run: npm ls
+      # Run Docker container to build the Vite app
+      - name: Build Vite app inside Docker
+        run: |
+          docker run --rm -v $(pwd):/app vite-react-app npm run build
 
-      # Build the application
-      - name: Build Vite app
-        run: npm run build
-
-      # Deploy to S3
+      # Deploy to S3 from Docker container
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
