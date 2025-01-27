@@ -3,7 +3,7 @@ name: Deploy Vite React App to S3
 on:
   push:
     branches:
-      - master # Replace 'main' with 'master'
+      - master # Change this if you're using a different branch name
 
 jobs:
   deploy:
@@ -14,15 +14,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Node.js
+      # Set up Node.js (ensure compatibility with the version you are using)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16' # Ensure compatibility with your project
+          node-version: '22.13.0' # Ensure compatibility with your project
+
+      # Debug: Check Node.js version
+      - name: Check Node.js version
+        run: node -v
 
       # Install dependencies
       - name: Install dependencies
         run: npm install
+
+      # Debug: Run a simple check on dependencies
+      - name: Verify dependencies
+        run: npm ls
 
       # Build the application
       - name: Build Vite app
