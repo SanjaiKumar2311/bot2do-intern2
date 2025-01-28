@@ -1,4 +1,51 @@
-name: Deploy Vite React App to S3 with Docker
+# name: Deploy Vite React App to S3 with Docker
+
+# on:
+#   push:
+#     branches:
+#       - master  # Change this if you're using a different branch name
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Checkout code
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       # Set up Docker Buildx
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v2
+
+#       # Debug: Check Docker version
+#       - name: Check Docker version
+#         run: docker --version
+
+#       # Build Docker image
+#       - name: Build Docker image
+#         run: |
+#           docker build -t vite-react-app .
+
+#       # Run Docker container to build the Vite app
+#       - name: Build Vite app inside Docker
+#         run: |
+#           docker run --rm -v $(pwd):/app vite-react-app npm install
+#           docker run --rm -v $(pwd):/app vite-react-app npm run build
+
+#       # Deploy to S3 from Docker container
+#       - name: Deploy to S3
+#         uses: jakejarvis/s3-sync-action@v0.5.1
+#         with:
+#           args: --acl public-read --delete
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           AWS_S3_BUCKET: ${{ secrets.AWS_BUCKET_NAME }}
+#           AWS_REGION: ${{ secrets.AWS_REGION }}
+#           SOURCE_DIR: dist # Vite outputs the build to the 'dist' folder by default
+
+name: Deploy Vite React App to S3 and CloudFront with Docker
 
 on:
   push:
@@ -10,30 +57,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Docker Buildx
+      # Step 2: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Debug: Check Docker version
-      - name: Check Docker version
-        run: docker --version
-
-      # Build Docker image
+      # Step 3: Build Docker image
       - name: Build Docker image
         run: |
           docker build -t vite-react-app .
 
-      # Run Docker container to build the Vite app
+      # Step 4: Run Docker container to build the Vite app
       - name: Build Vite app inside Docker
         run: |
           docker run --rm -v $(pwd):/app vite-react-app npm install
           docker run --rm -v $(pwd):/app vite-react-app npm run build
 
-      # Deploy to S3 from Docker container
+      # Step 5: Sync built files to S3
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
@@ -43,4 +86,13 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_S3_BUCKET: ${{ secrets.AWS_BUCKET_NAME }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          SOURCE_DIR: dist # Vite outputs the build to the 'dist' folder by default
+          SOURCE_DIR: dist  # Vite outputs the build to the 'dist' folder by default
+
+      # Step 6: Invalidate CloudFront cache
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
